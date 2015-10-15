@@ -34,7 +34,6 @@ Vagrant.configure(2) do |config|
     ln -s /vagrant/bitcoin /home/vagrant/.bitcoin
     chown -R vagrant:vagrant /home/vagrant/.bitcoin
     
-    su vagrant
     bitcoind -daemon
   SHELL
 end
