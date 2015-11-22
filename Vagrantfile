@@ -1,14 +1,11 @@
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
 
-  config.vm.network "forwarded_port", guest: 8333, host: 8333, protocol: 'tcp'
-  config.vm.network "forwarded_port", guest: 8332, host: 8332, protocol: 'tcp'
+  config.vm.network "public_network"
   
   config.vm.provider "virtualbox" do |v|
     v.memory = 2048
     #v.cpus = 2
-    v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-    v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
   end
 
   config.vm.provision "shell", privileged: false, inline: <<-SHELL
@@ -23,17 +20,17 @@ Vagrant.configure(2) do |config|
     sudo apt-get install -y libevent-dev
     sudo apt-get install -y libboost-all-dev
 
+    mkdir .bitcoin
+    ln -s /vagrant/bitcoin.conf /home/vagrant/.bitcoin/
+
+    cd /vagrant
     git clone https://github.com/bitcoin/bitcoin.git
     cd bitcoin
     ./autogen.sh
     ./configure --disable-tests --disable-wallet
     make
     sudo make install
-    
-    mkdir /home/vagrant/.bitcoin
-    ln -s /vagrant/bitcoin /home/vagrant/.bitcoin
-    chown -R vagrant:vagrant /home/vagrant/.bitcoin
-    
+
     bitcoind -daemon
   SHELL
 end
