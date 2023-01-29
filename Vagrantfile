@@ -1,5 +1,6 @@
 Vagrant.configure(2) do |config|
-  config.vm.box = "ubuntu/trusty64"
+  config.disksize.size = '400GB' # must do `vagrant plugin install vagrant-disksize`
+  config.vm.box = "ubuntu/bionic64"
 
   config.vm.network "forwarded_port", guest: 8333, host: 8333 #mainnet
   #config.vm.network "forwarded_port", guest: 18333, host: 18333 #testnet
@@ -15,14 +16,15 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provision "shell", privileged: false, inline: <<-SHELL
-    sudo add-apt-repository -y ppa:bitcoin/bitcoin
-    sudo apt-get update
-    sudo apt-get install -y bitcoind
+    sudo apt update && sudo apt -y upgrade
+    sudo apt install -y snap
+    sudo snap install bitcoin-core
+
 
     sudo apt-get install -y supervisor
 
-    mkdir .bitcoin
-    ln -s /vagrant/bitcoin.conf /home/vagrant/.bitcoin/
+    mkdir -p /home/vagrant/snap/bitcoin-core/common/.bitcoin/
+    ln -s /vagrant/bitcoin.conf /home/vagrant/snap/bitcoin-core/common/.bitcoin/
 
     sudo ln -s /vagrant/bitcoin_supervisor.conf /etc/supervisor/conf.d
     sudo supervisorctl reread
